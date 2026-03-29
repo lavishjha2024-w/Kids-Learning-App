@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -65,6 +66,53 @@
     --kids-yellow: 45 60% 93%;
     --kids-pink: 340 60% 93%;
   }
+
+  /* Eye-friendly dark: deep soft violet-gray, pastel accents */
+  .dark {
+    --background: 250 22% 12%;
+    --foreground: 45 25% 93%;
+    --card: 250 20% 16%;
+    --card-foreground: 45 25% 93%;
+    --popover: 250 20% 16%;
+    --popover-foreground: 45 25% 93%;
+    --primary: 196 45% 45%;
+    --primary-foreground: 250 22% 12%;
+    --secondary: 150 35% 40%;
+    --secondary-foreground: 45 25% 96%;
+    --muted: 250 18% 22%;
+    --muted-foreground: 250 12% 68%;
+    --accent: 270 40% 48%;
+    --accent-foreground: 45 25% 96%;
+    --destructive: 0 50% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 250 16% 26%;
+    --input: 250 16% 26%;
+    --ring: 196 50% 55%;
+    --kids-blue: 196 45% 42%;
+    --kids-mint: 150 35% 38%;
+    --kids-lavender: 270 40% 45%;
+    --kids-peach: 25 45% 48%;
+    --kids-yellow: 45 50% 50%;
+    --kids-pink: 340 45% 48%;
+    --sidebar-background: 250 22% 14%;
+    --sidebar-foreground: 45 20% 92%;
+    --sidebar-border: 250 16% 24%;
+  }
+
+  /* Softer contrast bump for low vision (still rounded, not stark black/white) */
+  .high-contrast {
+    --foreground: 240 15% 18%;
+    --muted-foreground: 240 10% 35%;
+    --border: 240 12% 72%;
+    --ring: 196 90% 40%;
+  }
+
+  .dark.high-contrast {
+    --foreground: 45 30% 96%;
+    --muted-foreground: 250 15% 78%;
+    --border: 250 20% 38%;
+    --ring: 196 70% 60%;
+  }
 }
 
 @layer base {
@@ -73,7 +121,13 @@
   }
 
   body {
-    @apply bg-background text-foreground font-nunito;
+    @apply bg-background text-foreground font-nunito antialiased;
+  }
+
+  .dyslexia-font body {
+    font-family: "Lexend", "Nunito", system-ui, sans-serif;
+    letter-spacing: 0.02em;
+    word-spacing: 0.06em;
   }
 }
 

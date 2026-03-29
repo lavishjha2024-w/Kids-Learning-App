@@ -1,141 +1,94 @@
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { RotateCcw, ArrowLeft } from "lucide-react";
-import { useApp } from "@/context/AppContext";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
+import MemoryMatchGame from "@/components/games/MemoryMatchGame";
+import DragMatchGame from "@/components/games/DragMatchGame";
+import PicturePuzzleGame from "@/components/games/PicturePuzzleGame";
+import QuizGame from "@/components/games/QuizGame";
+import PatternGame from "@/components/games/PatternGame";
+import SpellGame from "@/components/games/SpellGame";
 
-const emojis = ["🐶", "🐱", "🐸", "🦋", "🌸", "🌈", "⭐", "🎵"];
-
-interface Card {
-  id: number;
-  emoji: string;
-  flipped: boolean;
-  matched: boolean;
-}
-
-const createCards = (): Card[] => {
-  const pairs = [...emojis, ...emojis];
-  return pairs
-    .sort(() => Math.random() - 0.5)
-    .map((emoji, i) => ({ id: i, emoji, flipped: false, matched: false }));
-};
+const gameTabs = [
+  { id: "memory", label: "Memory", emoji: "🃏" },
+  { id: "match", label: "Match", emoji: "🍎" },
+  { id: "puzzle", label: "Puzzle", emoji: "🧩" },
+  { id: "quiz", label: "Quiz", emoji: "❓" },
+  { id: "pattern", label: "Pattern", emoji: "🔁" },
+  { id: "spell", label: "Spell", emoji: "✏️" },
+];
 
 const Games = () => {
-  const { incrementGames, addBadge } = useApp();
-  const [playing, setPlaying] = useState(false);
-  const [cards, setCards] = useState<Card[]>([]);
-  const [selected, setSelected] = useState<number[]>([]);
-  const [moves, setMoves] = useState(0);
-  const [won, setWon] = useState(false);
-
-  const startGame = () => {
-    setCards(createCards());
-    setSelected([]);
-    setMoves(0);
-    setWon(false);
-    setPlaying(true);
-  };
-
-  useEffect(() => {
-    if (selected.length === 2) {
-      const [a, b] = selected;
-      setMoves((m) => m + 1);
-
-      if (cards[a].emoji === cards[b].emoji) {
-        setTimeout(() => {
-          setCards((prev) =>
-            prev.map((c) => (c.id === a || c.id === b ? { ...c, matched: true } : c))
-          );
-          setSelected([]);
-        }, 400);
-      } else {
-        setTimeout(() => {
-          setCards((prev) =>
-            prev.map((c) => (c.id === a || c.id === b ? { ...c, flipped: false } : c))
-          );
-          setSelected([]);
-        }, 800);
-      }
-    }
-  }, [selected, cards]);
-
-  useEffect(() => {
-    if (playing && cards.length > 0 && cards.every((c) => c.matched)) {
-      setWon(true);
-      incrementGames();
-      addBadge("memory-champion");
-    }
-  }, [cards, playing, incrementGames, addBadge]);
-
-  const handleFlip = (id: number) => {
-    if (selected.length >= 2) return;
-    if (cards[id].flipped || cards[id].matched) return;
-
-    setCards((prev) => prev.map((c) => (c.id === id ? { ...c, flipped: true } : c)));
-    setSelected((prev) => [...prev, id]);
-  };
-
-  if (!playing) {
-    return (
-      <div className="page-container text-center">
-        <h1 className="kids-heading text-2xl mb-2">🎮 Games</h1>
-        <p className="text-muted-foreground mb-8">Fun games that help you learn!</p>
-
-        <motion.button
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          onClick={startGame}
-          className="kids-card-interactive max-w-sm mx-auto text-center"
-        >
-          <span className="text-5xl block mb-3">🧠</span>
-          <h3 className="font-bold text-lg">Memory Match</h3>
-          <p className="text-sm text-muted-foreground">Find matching pairs!</p>
-        </motion.button>
-      </div>
-    );
-  }
-
   return (
     <div className="page-container">
-      <div className="flex items-center justify-between mb-6">
-        <button onClick={() => setPlaying(false)} className="flex items-center gap-2 text-muted-foreground font-semibold">
-          <ArrowLeft size={20} /> Back
-        </button>
-        <span className="font-bold">Moves: {moves}</span>
-        <button onClick={startGame} className="kids-btn-secondary text-sm !px-4 !py-2 !min-h-0">
-          <RotateCcw size={16} /> New Game
-        </button>
-      </div>
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+        <h1 className="kids-heading text-3xl sm:text-4xl mb-1">Play & explore</h1>
+        <p className="text-muted-foreground font-semibold text-balance">
+          Pick a mini-game — every try makes your brain stronger.
+        </p>
+      </motion.div>
 
-      {won ? (
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="text-center py-12"
+      <Tabs defaultValue="memory" className="w-full">
+        <TabsList
+          className={cn(
+            "w-full h-auto flex flex-wrap justify-start gap-2 rounded-2xl bg-muted/80 p-2 mb-6 border border-border/60",
+          )}
         >
-          <span className="text-6xl block mb-4">🎉</span>
-          <h2 className="kids-heading text-2xl mb-2">You Did It!</h2>
-          <p className="text-muted-foreground mb-4">Completed in {moves} moves! Great job! 🌟</p>
-          <button onClick={startGame} className="kids-btn-primary">Play Again 🔄</button>
-        </motion.div>
-      ) : (
-        <div className="grid grid-cols-4 gap-3 max-w-sm mx-auto">
-          {cards.map((card) => (
-            <motion.button
-              key={card.id}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => handleFlip(card.id)}
-              className={`aspect-square rounded-2xl text-3xl flex items-center justify-center font-bold transition-all duration-300 min-h-[56px] ${
-                card.flipped || card.matched
-                  ? "bg-kids-mint"
-                  : "bg-kids-lavender hover:bg-kids-lavender/80"
-              } ${card.matched ? "opacity-60" : ""}`}
-              aria-label={card.flipped || card.matched ? card.emoji : "Hidden card"}
+          {gameTabs.map((t) => (
+            <TabsTrigger
+              key={t.id}
+              value={t.id}
+              className="rounded-xl px-4 py-3 text-sm sm:text-base font-bold data-[state=active]:shadow-soft data-[state=active]:bg-card gap-1.5 min-h-[48px]"
             >
-              {card.flipped || card.matched ? card.emoji : "?"}
-            </motion.button>
+              <span aria-hidden>{t.emoji}</span>
+              {t.label}
+            </TabsTrigger>
           ))}
-        </div>
-      )}
+        </TabsList>
+
+        <TabsContent value="memory" className="mt-0 focus-visible:outline-none">
+          <motion.section
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="kids-card border border-border/40"
+            aria-labelledby="game-memory-title"
+          >
+            <h2 id="game-memory-title" className="sr-only">
+              Memory match game
+            </h2>
+            <MemoryMatchGame />
+          </motion.section>
+        </TabsContent>
+        <TabsContent value="match" className="mt-0 focus-visible:outline-none">
+          <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="kids-card border border-border/40">
+            <h2 className="sr-only">Snack matching game</h2>
+            <DragMatchGame />
+          </motion.section>
+        </TabsContent>
+        <TabsContent value="puzzle" className="mt-0 focus-visible:outline-none">
+          <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="kids-card border border-border/40">
+            <h2 className="sr-only">Story puzzle</h2>
+            <PicturePuzzleGame />
+          </motion.section>
+        </TabsContent>
+        <TabsContent value="quiz" className="mt-0 focus-visible:outline-none">
+          <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="kids-card border border-border/40">
+            <h2 className="sr-only">Picture quiz</h2>
+            <QuizGame />
+          </motion.section>
+        </TabsContent>
+        <TabsContent value="pattern" className="mt-0 focus-visible:outline-none">
+          <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="kids-card border border-border/40">
+            <h2 className="sr-only">Pattern game</h2>
+            <PatternGame />
+          </motion.section>
+        </TabsContent>
+        <TabsContent value="spell" className="mt-0 focus-visible:outline-none">
+          <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="kids-card border border-border/40">
+            <h2 className="sr-only">Spelling game</h2>
+            <SpellGame />
+          </motion.section>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
